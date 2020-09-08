@@ -51,7 +51,7 @@ impl Token {
 
     async fn get_token(scope: &str) -> Result<(String, u64), Error> {
         let now = now();
-        let exp = now + (3600 * 20);
+        let exp = now + 3600;
 
         let claims = Claims {
             iss: crate::SERVICE_ACCOUNT.client_email.clone(),
