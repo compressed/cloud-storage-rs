@@ -125,9 +125,12 @@ impl HmacKey {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn create_sync() -> crate::Result<Self> {
-        Self::create().await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::create())
     }
 
     /// Retrieves a list of HMAC keys matching the criteria. Since the HmacKey is secret, this does
@@ -171,8 +174,8 @@ impl HmacKey {
             Ok(parsed) => match parsed {
                 GoogleResponse::Success(s) => Ok(s.items),
                 GoogleResponse::Error(e) => Err(e.into()),
-            }
-            Err(_) =>  Ok(vec![]),
+            },
+            Err(_) => Ok(vec![]),
         }
     }
 
@@ -181,9 +184,12 @@ impl HmacKey {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn list_sync() -> crate::Result<Vec<HmacMeta>> {
-        Self::list().await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::list())
     }
 
     /// Retrieves an HMAC key's metadata. Since the HmacKey is secret, this does not return a
@@ -229,9 +235,12 @@ impl HmacKey {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn read_sync(access_id: &str) -> crate::Result<HmacMeta> {
-        Self::read(access_id).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::read(access_id))
     }
 
     /// Updates the state of an HMAC key. See the HMAC Key resource descriptor for valid states.
@@ -279,9 +288,12 @@ impl HmacKey {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn update_sync(access_id: &str, state: HmacState) -> crate::Result<HmacMeta> {
-        Self::update(access_id, state).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::update(access_id, state))
     }
 
     /// Deletes an HMAC key. Note that a key must be set to `Inactive` first.
@@ -321,10 +333,13 @@ impl HmacKey {
     }
 
     /// The synchronous equivalent of `HmacKey::delete`.
-    #[tokio::main]
     #[cfg(feature = "sync")]
     pub async fn delete_sync(access_id: &str) -> crate::Result<()> {
-        Self::delete(access_id).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::delete(access_id))
     }
 }
 

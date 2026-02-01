@@ -209,14 +209,17 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
-    pub async fn create_sync(
+    pub fn create_sync(
         bucket: &str,
         file: Vec<u8>,
         filename: &str,
         mime_type: &str,
     ) -> crate::Result<Self> {
-        Self::create(bucket, file, filename, mime_type).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::create(bucket, file, filename, mime_type))
     }
 
     /// Create a new object. This works in the same way as `Object::create`, except it does not need
@@ -281,7 +284,6 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn create_streamed_sync<R: std::io::Read + Send + 'static>(
         bucket: &str,
         mut file: R,
@@ -295,7 +297,13 @@ impl Object {
 
         let stream = stream::once(async { Ok::<_, Error>(buffer) });
 
-        Self::create_streamed(bucket, stream, length, filename, mime_type).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::create_streamed(
+                bucket, stream, length, filename, mime_type,
+            ))
     }
 
     /// Obtain a list of objects within this Bucket.
@@ -320,11 +328,14 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn list_sync(bucket: &str) -> Result<Vec<Self>, Error> {
         use futures::TryStreamExt;
 
-        Self::list_from(bucket, None).await?.try_concat().await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::list_from(bucket, None).await?.try_concat())
     }
 
     /// Obtain a list of objects by prefix within this Bucket .
@@ -350,14 +361,14 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn list_prefix_sync(bucket: &str, prefix: &str) -> Result<Vec<Self>, Error> {
         use futures::TryStreamExt;
 
-        Self::list_from(bucket, Some(prefix))
-            .await?
-            .try_concat()
-            .await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::list_from(bucket, Some(prefix)).await?.try_concat())
     }
 
     async fn list_from<'a>(
@@ -460,9 +471,12 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn read_sync(bucket: &str, file_name: &str) -> crate::Result<Self> {
-        Self::read(bucket, file_name).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::read(bucket, file_name))
     }
 
     /// Download the content of the object with the specified name in the specified bucket.
@@ -498,9 +512,12 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
-    pub async fn download_sync(bucket: &str, file_name: &str) -> crate::Result<Vec<u8>> {
-        Self::download(bucket, file_name).await
+    pub fn download_sync(bucket: &str, file_name: &str) -> crate::Result<Vec<u8>> {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::download(bucket, file_name))
     }
 
     /// Download the content of the object with the specified name in the specified bucket, without
@@ -582,9 +599,12 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
-    pub async fn update_sync(&self) -> crate::Result<Self> {
-        self.update().await
+    pub fn update_sync(&self) -> crate::Result<Self> {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(self.update())
     }
 
     /// Deletes a single object with the specified name in the specified bucket.
@@ -622,9 +642,12 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
-    pub async fn delete_sync(bucket: &str, file_name: &str) -> Result<(), Error> {
-        Self::delete(bucket, file_name).await
+    pub fn delete_sync(bucket: &str, file_name: &str) -> Result<(), Error> {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::delete(bucket, file_name))
     }
 
     /// Obtains a single object with the specified name in the specified bucket.
@@ -687,13 +710,16 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn compose_sync(
         bucket: &str,
         req: &ComposeRequest,
         destination_object: &str,
     ) -> crate::Result<Self> {
-        Self::compose(bucket, req, destination_object).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::compose(bucket, req, destination_object))
     }
 
     /// Copy this object to the target bucket and path
@@ -740,9 +766,12 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn copy_sync(&self, destination_bucket: &str, path: &str) -> crate::Result<Self> {
-        self.copy(destination_bucket, path).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(self.copy(destination_bucket, path))
     }
 
     /// Moves a file from the current location to the target bucket and path.
@@ -796,9 +825,12 @@ impl Object {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn rewrite_sync(&self, destination_bucket: &str, path: &str) -> crate::Result<Self> {
-        self.rewrite(destination_bucket, path).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(self.rewrite(destination_bucket, path))
     }
 
     /// Creates a [Signed Url](https://cloud.google.com/storage/docs/access-control/signed-urls)
@@ -1073,7 +1105,6 @@ mod tests {
         }
         // let data = data.next().await.flat_map(|part| part.into_iter()).collect();
         assert_eq!(data, content);
-
 
         Ok(())
     }

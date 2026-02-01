@@ -136,12 +136,15 @@ impl BucketAccessControl {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn create_sync(
         bucket: &str,
         new_bucket_access_control: &NewBucketAccessControl,
     ) -> crate::Result<Self> {
-        Self::create(bucket, new_bucket_access_control).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::create(bucket, new_bucket_access_control))
     }
 
     /// Returns all `BucketAccessControl`s related to this bucket.
@@ -180,9 +183,12 @@ impl BucketAccessControl {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn list_sync(bucket: &str) -> crate::Result<Vec<Self>> {
-        Self::list(bucket).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::list(bucket))
     }
 
     /// Returns the ACL entry for the specified entity on the specified bucket.
@@ -221,9 +227,12 @@ impl BucketAccessControl {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn read_sync(bucket: &str, entity: &Entity) -> crate::Result<Self> {
-        Self::read(bucket, entity).await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(Self::read(bucket, entity))
     }
 
     /// Update this `BucketAccessControl`.
@@ -265,9 +274,12 @@ impl BucketAccessControl {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn update_sync(&self) -> crate::Result<Self> {
-        self.update().await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(self.update())
     }
 
     /// Permanently deletes the ACL entry for the specified entity on the specified bucket.
@@ -306,9 +318,12 @@ impl BucketAccessControl {
     /// ### Features
     /// This function requires that the feature flag `sync` is enabled in `Cargo.toml`.
     #[cfg(feature = "sync")]
-    #[tokio::main]
     pub async fn delete_sync(self) -> crate::Result<()> {
-        self.delete().await
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to build tokio runtime")
+            .block_on(self.delete())
     }
 }
 
