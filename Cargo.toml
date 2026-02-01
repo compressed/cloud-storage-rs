@@ -13,14 +13,10 @@ categories = ["api-bindings", "web-programming"]
 # maintenance = { status = "actively-developed" }
 
 [features]
-default = ["native-tls"]
-
 sync = ["reqwest/blocking"]
-native-tls = ["reqwest/default-tls"]
-rustls-tls = ["reqwest/rustls-tls"]
 
 [dependencies]
-reqwest =          { version = "0.10", default-features = false, features = ["json", "stream"] }
+reqwest =          { version = "0.13", features = ["json", "stream", "form", "query", "multipart"] }
 percent-encoding = { version = "2",    default-features = false }
 jsonwebtoken =     { version = "7",    default-features = false }
 serde =            { version = "1",    default-features = false, features = ["derive"] }
@@ -30,10 +26,14 @@ lazy_static =      { version = "1",    default-features = false }
 dotenv =           { version = "0.15", default-features = false }
 openssl =          { version = "0.10", default-features = false }
 chrono =           { version = "0.4",  default-features = false, features = ["serde"] }
-hex =              { version = "0.4",  default-features = false }
-tokio =            { version = "0.2",  default-features = false, features = ["macros", "rt-threaded"] }
-futures =          { version = "0.3",  default_features = false }
-bytes =            { version = "0.5",  default_features = false }
+hex =              { version = "0.4",  default-features = false, features = ["alloc"] }
+tokio =            { version = "1.0",  default-features = false, features = ["macros", "rt"] }
+futures =          { version = "0.3",  default-features = false }
+bytes =            { version = "1.0",  default-features = false }
+
+
+[dev-dependencies]
+tokio =            { version = "1.0",  default-features = false, features = ["full"] }
 
 [package.metadata.docs.rs]
 features = ["sync"]
